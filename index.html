@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Odoo_rpc Notes</title>
+  <!-- Include highlight.js CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+  <style>
+   
+
+    h1, h2 {
+      color: #02050c; /* Change to your desired title color */
+    } */
+
+    .dart-code-container {
+      background-color: #1a1a1a; /* Change to your desired code background color */
+    }
+
+    code.dart {
+      background-color: #000000; /* Change to your desired Dart code background color */
+      color: #ffffff; /* Change to your desired Dart code text color */
+    }
+
+ 
+  </style>
+
+</head>
+<body>
+
+  <h1>BHW Odoo_rpc Notes</h1>
+
+  <!-- Dart code blocks -->
+  <div class="dart-code-container">
+    <h2>Sample 1: Login With Odoo_rpc</h2>
+    <pre><code class="dart" id="dartCode1">
+      // Odooligin function
+      void loginToOdoo() async {
+        final orpc = OdooClient(serverAddress); // add serveraddress
+      
+        try {
+          final uid = await orpc.authenticate(
+            db_name,
+            _emailController.text, // Add Username
+            _passwordController.text, // AddPassword
+          );
+      
+          // log('Successfully logged in with UID: $uid');
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(content: Text('Success login')));
+      
+          // Navigate to the next screen or perform other actions upon successful login
+      
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => UserProfileScreen(uid)),
+            (route) => false,
+          );
+        } catch (e) {
+          log('Login failed: $e');
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Invalid username or password')));
+          // Handle login failure (show error message, etc.)
+        }
+      }
+    </code></pre>
+    <button onclick="copyToClipboard('dartCode1', this)">Copy to Clipboard</button>
+  </div>
+
+  <div class="dart-code-container">
+    <h2>Sample 2: Odoo Get data list </h2>
+    <pre><code class="dart" id="dartCode2">
+      // odoo Get data list function
+      Future<dynamic> fetchContacts() async {
+        await orpc.authenticate('dbname', 'username', 'password');
+        dynamic res = await orpc.callKw({
+          'model': '', //add  table name
+          'method': 'search_read', // this is get user data
+          'args': [],
+          'kwargs': {
+            'context': {'bin_size': true},
+            'domain': [],
+            'fields': [
+              'name',
+              'login',
+              'login_date',
+      
+              // can add another fields in table
+            ],
+            // 'limit': 100,
+          },
+        });
+        log("ResultData>>> $res");
+      
+        return res;
+      }
+    </code></pre>
+    <button onclick="copyToClipboard('dartCode2', this)">Copy to Clipboard</button>
+  </div>
+
+  <div class="dart-code-container">
+    <h2>Sample 3: Odoo_rpc get data by id </h2>
+    <pre><code class="dart" id="dartCode3">
+      // get data by id function
+
+      Future<void> fetchData() async {
+        // this fun need to require to call in set state
+        try {
+          // Call the method to fetch data
+          dynamic result = await fetchContactById(); // add user id
+      
+          // Update the state with the fetched data
+          setState(() {
+            userData = result;
+          });
+        } catch (error) {
+          // Handle errors if necessary
+          log("Error fetching data: $error");
+        }
+      }
+      
+      final orpc = OdooClient(serverAddress); // add serveraddress
+      
+      Future<dynamic> fetchContactById(String? userId) async {
+        // log("ResultData for user with ID $userId");
+        await orpc.authenticate(db_name, user_name, passwrd);
+        dynamic res = await orpc.callKw({
+          'model': '', // add table name
+          'method': 'search_read', // this is get data method
+          'args': [
+            [
+              ['id', '=', userId] // call data with id
+            ]
+          ],
+          'kwargs': {
+            'context': {'bin_size': true},
+            'fields': [
+              'name',
+              'login',
+              'login_date',
+              'lang',
+              'company_id',
+            ],
+          },
+          'join': [
+            [
+              'res.company',
+              '=',
+              'res.users.companyId'
+            ], // this is join table to table with id
+          ],
+        });
+        log("ResultData for user with ID  $res");
+      
+        return res;
+      }
+    </code></pre>
+    <button onclick="copyToClipboard('dartCode3', this)">Copy to Clipboard</button>
+  </div>
+
+  <div class="dart-code-container">
+    <h2>Sample 4: create data in odoo_rpc</h2>
+    <pre><code class="dart" id="dartCode4">
+      // create data in odoo function
+      void odooReg(String? email, String? password) async {
+        final OdooClient client = OdooClient(serverAddress);
+      
+        try {
+          await client.authenticate(db_name, user_name, passwrd);
+      
+          final int userId = await client.callKw({
+            'model': '', // add table name
+            'method': 'create',
+            'args': [
+              {
+                'name': email,
+                'login': email,
+                'password': password,
+              },
+            ],
+            'kwargs': {},
+          });
+          log('message');
+      
+          // final int userId = result[0] as int;
+      
+          log('New user created with ID: $userId');
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const ScreenName()),
+            (route) => false,
+          );
+        } catch (e) {
+          log('Error: $e');
+        }
+      }
+    </code></pre>
+    <button onclick="copyToClipboard('dartCode4', this)">Copy to Clipboard</button>
+  </div>
+
+  <div class="dart-code-container">
+    <h2>Sample 5: Email valdation</h2>
+    <pre><code class="dart" id="dartCode5">
+      // email valdation check
+      final RegExp _emailRegExp = RegExp(
+        r'^[a-zA-Z0-9.-_]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,}$',
+      );
+      
+      bool _validateEmail(BuildContext context, String email) {
+        if (email.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please enter an email address'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return false;
+        } else if (!_emailRegExp.hasMatch(email)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Invalid email format'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return false;
+        }
+        return true;
+      }  </code></pre>
+    <button onclick="copyToClipboard('dartCode5', this)">Copy to Clipboard</button>
+  </div>
+
+  <div class="dart-code-container">
+    <h2>Sample 6: Git Ignore</h2>
+    <pre><code class="dart" id="dartCode6">
+      gitignore 
+
+      # Miscellaneous
+      *.class
+      *.log
+      *.pyc
+      *.swp
+      .DS_Store
+      .atom/
+      .buildlog/
+      .history
+      .svn/
+      migrate_working_dir/
+      
+      # IntelliJ related
+      *.iml
+      *.ipr
+      *.iws
+      .idea/
+      
+      
+      # The .vscode folder contains launch configuration and tasks you configure in
+      # VS Code which you may wish to be included in version control, so this line
+      # is commented out by default.
+      #.vscode/
+      
+      # Flutter/Dart/Pub related
+      **/doc/api/
+      **/ios/Flutter/.last_build_id
+      .dart_tool/
+      .flutter-plugins
+      .flutter-plugins-dependencies
+      .packages
+      .pub-cache/
+      .pub/
+      /build/
+      
+      # Symbolication related
+      app.*.symbols
+      
+      # Obfuscation related
+      app.*.map.json
+      
+      # Android Studio will place build artifacts here
+      /android/app/debug
+      /android/app/profile
+      /android/app/release
+      pubspec.lock
+      
+      .........................................................................................................
+      
+      
+      
+        </code></pre>
+    <button onclick="copyToClipboard('dartCode6', this)">Copy to Clipboard</button>
+  </div>
+
+
+  <!-- Include highlight.js and clipboard.js scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
+
+  <script>
+    // Initialize highlight.js for syntax highlighting
+    hljs.highlightAll();
+
+    // Initialize clipboard.js for copying to clipboard
+    var clipboard = new ClipboardJS('.dart-code-container button', {
+      text: function(trigger) {
+        var codeId = trigger.getAttribute('data-clipboard-target');
+        return document.getElementById(codeId).textContent;
+      }
+    });
+
+    // Show success message on successful copy
+    clipboard.on('success', function(e) {
+      console.log(e);
+      updateCopyButton(e.trigger, 'Copied!');
+    });
+
+    // Show error message on failure to copy
+    clipboard.on('error', function(e) {
+      console.error(e);
+      updateCopyButton(e.trigger, 'Failed to copy');
+    });
+
+    // Function to manually copy code to clipboard
+    function copyToClipboard(codeId, button) {
+      var codeElement = document.getElementById(codeId);
+      var range = document.createRange();
+      range.selectNode(codeElement);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+      document.execCommand('copy');
+      window.getSelection().removeAllRanges();
+      updateCopyButton(button, 'Copied!');
+    }
+
+    // Function to update the copy button text
+    function updateCopyButton(button, text) {
+      button.textContent = text;
+      setTimeout(function() {
+        button.textContent = 'Copy to Clipboard';
+      }, 2000); // Reset text after 2 seconds
+    }
+  </script>
+
+</body>
+</html>
