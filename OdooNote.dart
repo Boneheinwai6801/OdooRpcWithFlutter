@@ -1,4 +1,4 @@
-// Odooligin function
+// Odoo_rpc ligin function
 void loginToOdoo() async {
   final orpc = OdooClient(serverAddress); // add serveraddress
 
@@ -28,7 +28,7 @@ void loginToOdoo() async {
   }
 }
 
-// odoo Get data list function
+// odoo_rpc Get data list function
 Future<dynamic> fetchContacts() async {
   await orpc.authenticate('dbname', 'username', 'password');
   dynamic res = await orpc.callKw({
