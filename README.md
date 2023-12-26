@@ -1,2 +1,2 @@
 # OdooRpcWithFlutter
-By Bhw 
+Odoo_rpc note By Bhw 
